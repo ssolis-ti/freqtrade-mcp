@@ -1,5 +1,5 @@
 {
-  "feature_directory": "specs/002-agentes-llm-bloque",
-  "name": "agentes-llm-bloque",
-  "number": 2
+  "feature_directory": "specs/003-despacho-operativo",
+  "name": "despacho-operativo",
+  "number": 3
 }

@@ -240,12 +240,14 @@ corpus descargado, RAG por bloque, agentes LLM por bloque, MCP stdio validado,
 benchmark funcional. El estado pormenorizado (índices, pendientes, limitaciones) está
 en `docs/ARQUITECTURA.md` sección 10.
 
-Lo que sigue (feature 003, pendiente de definir):
+Lo que sigue (feature 003 — **spec definido**, pendiente de implementación):
+- `despacho/` — capa de operación: wrapper REST integrable, gate de permisos (OK del
+  usuario para tools de ejecución), Manager orquestador, cadena dry-run.
 - Conectar los agentes al wrapper REST de freqtrade (`prototype/freqtrade-mcp`, 19 tools)
   para que puedan OPERAR (forceenter, forceexit, blacklist, ...).
-- Manager orquestador + cadena de validación (datos → estrategia → backtest → hyperopt
-  → riesgo) en dry-run.
+- Cadena de validación (datos → estrategia → backtest → hyperopt → riesgo) en dry-run.
 - Paso dry-run → live: **solo con OK explícito del usuario** (regla dura, constitution III).
+- Detalle completo: `specs/003-despacho-operativo/`.
 
 ## Lecturas de referencia
 
@@ -254,7 +256,8 @@ Lo que sigue (feature 003, pendiente de definir):
 - `docs/freqtrade-integracion.md` — comandos CLI y endpoints REST verificados de la doc
   oficial (mapa de la maquinaria que los agentes controlan).
 - `docs/risk-modulo.md` — cuadro de control de riesgo (stoploss/leverage/futuros/delists).
-- `specs/001-framework-rag-mcp/` y `specs/002-agentes-llm-bloque/` — specs SDD del diseño.
+- `specs/001-framework-rag-mcp/`, `specs/002-agentes-llm-bloque/` y
+  `specs/003-despacho-operativo/` — specs SDD del diseño.
 
 ---
 
