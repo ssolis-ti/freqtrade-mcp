@@ -1,7 +1,11 @@
 # Freqtrade Multi-Agent Framework
 
-> **Idea + Prototipo** — diseño de cómo operar freqtrade con múltiples agentes LLM
-> especializados. El `prototype/` es una prueba funcional mínima de la premisa.
+> **Base implementada y operativa** — sistema de agentes LLM especializados que operan
+> freqtrade, donde cada agente se apropia de **un bloque documental** de la documentación
+> oficial con **RAG propio** (cerebro) y herramientas de control (manos, feature 003).
+>
+> **Para entender el proyecto en profundidad** (arquitectura, módulos, tools, formatos,
+> estado): leer `docs/ARQUITECTURA.md` — es el documento maestro.
 
 ## ¿Qué es esto?
 
@@ -231,27 +235,26 @@ Tools expuestas: `mcp_freq_config_responder`, `mcp_freq_config_consultar_docs`,
 
 ## Estado actual
 
-**Depurando la idea y el prototipo.** Este documento queda en modo **idea** mientras se
-define la oficina de agentes y se valida la premisa del prototipo. El desarrollo (incluido
-cualquier formato spec-driven) se hará **después** de tener la idea definida, no antes.
+**Base fundamental implementada y operativa** (features 001 + 002, 26/26 tests GREEN):
+corpus descargado, RAG por bloque, agentes LLM por bloque, MCP stdio validado,
+benchmark funcional. El estado pormenorizado (índices, pendientes, limitaciones) está
+en `docs/ARQUITECTURA.md` sección 10.
 
-Aún por depurar / preguntas abiertas:
-- ¿En qué bloque hay que **romper más** la documentación y en cuál **fusionar**? El borrador
-  asigna FreqAI=7 agentes, Estrategia=4, Backtest=4; ¿se sostiene o se ajusta por densidad real?
-- ¿El agente del capítulo debe **cargar ese capítulo en su contexto/prompt** o hacer **RAG**
-  sobre un índice de toda la doc y traer solo su sección? (método de "consulta la doc" pendiente).
-- ¿Empezamos con un **subconjunto MVP** (ej. solo Config + Estrategia + Backtest + Riesgo) y
-  añadimos FreqAI después, o lo hacemos completo desde el inicio?
-- ¿El contenedor `freqtrade-mcp` debe ser tool-only (sin LLM) o llevar LLM por capítulo?
-- ¿El paso dry-run → Live queda solo autorizado por el usuario (regla dura), o puede haber
-  límites automáticos del agente de stoploss/leverage?
+Lo que sigue (feature 003, pendiente de definir):
+- Conectar los agentes al wrapper REST de freqtrade (`prototype/freqtrade-mcp`, 19 tools)
+  para que puedan OPERAR (forceenter, forceexit, blacklist, ...).
+- Manager orquestador + cadena de validación (datos → estrategia → backtest → hyperopt
+  → riesgo) en dry-run.
+- Paso dry-run → live: **solo con OK explícito del usuario** (regla dura, constitution III).
 
 ## Lecturas de referencia
 
+- `docs/ARQUITECTURA.md` — **documento maestro** (arquitectura, módulos, tools, formatos, estado).
 - `docs/oficina-agentes.md` — diseño de la oficina (roles, modelos, endpoints, capas).
 - `docs/freqtrade-integracion.md` — comandos CLI y endpoints REST verificados de la doc
   oficial (mapa de la maquinaria que los agentes controlan).
 - `docs/risk-modulo.md` — cuadro de control de riesgo (stoploss/leverage/futuros/delists).
+- `specs/001-framework-rag-mcp/` y `specs/002-agentes-llm-bloque/` — specs SDD del diseño.
 
 ---
 
