@@ -29,10 +29,12 @@ def main() -> int:
     args = parser.parse_args()
 
     blocks = [get_block(args.block_id)] if args.block_id else all_blocks()
-    embedder = Embedder()
     t0 = time.time()
     for b in blocks:
         t = time.time()
+        # Embedder FRESCO por bloque: un fallo transitorio de Gemini (rate limit)
+        # no desactiva el backend para los bloques siguientes.
+        embedder = Embedder()
         try:
             manifest = index_block(b, force=args.force, embedder=embedder)
             mc = manifest["mirror_counts"]

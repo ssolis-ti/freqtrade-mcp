@@ -144,6 +144,25 @@ Configuración de embeddings en `.env` (ver `.env.example`): `EMBED_BASE_URL`,
 `EMBED_MODEL`, `EMBED_API_KEY`. Sin gateway disponible, degrada automáticamente a
 embeddings locales deterministas.
 
+### Embeddings semánticos (Google Gemini, free tier)
+
+Desde feature 001, el backend de embeddings tiene 3 niveles de prioridad:
+
+1. **Google Gemini** (`gemini-embedding-001`, free tier — $0 por 1M tokens) si hay
+   `GEMINI_API_KEY` en `.env` (crear en https://aistudio.google.com/apikey). Semántico y
+   multilingüe (dim 768 configurable).
+2. **Gateway LiteLLM/Bifrost** (`EMBED_BASE_URL` + `EMBED_MODEL`) si responde.
+3. **`local-hash`** — determinista, sin red (aproximación por palabras clave).
+
+Límites del free tier de Gemini: 100 requests/min. El indexador respeta el límite
+(sleep entre batches + retry con backoff en 429) y valida la dimensión devuelta.
+
+```bash
+# Reindexar todo con Gemini (o un bloque: python tools/index_blocks.py 02-configuracion --force)
+python tools/index_blocks.py --force
+# El manifiesto index.json queda con embed_model=gemini:gemini-embedding-001
+```
+
 ### Registro en Hermes (un server por bloque)
 
 ```yaml

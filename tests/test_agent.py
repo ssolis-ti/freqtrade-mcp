@@ -52,7 +52,7 @@ class FakeClient:
 
 
 def _ensure_indexed():
-    e = Embedder(base_url="http://127.0.0.1:9", model="test-embed")
+    e = Embedder(base_url="http://127.0.0.1:9", model="test-embed", gemini_key="")
     if not (RAG_DATA_DIR / "02-configuracion" / "index.json").exists():
         index_block(get_block("02-configuracion"), force=True, embedder=e)
     return e

@@ -32,6 +32,17 @@ class Retriever:
         self.chunks = json.loads(self.chunks_path.read_text(encoding="utf-8"))
         self.vectors = np.load(self.vectors_path)
         self.embedder = embedder or Embedder()
+        # Validacion: la dimension del embedder debe coincidir con el indice.
+        # Si no (p.ej. Gemini en rate limit -> degrade a local-hash), el error
+        # de matmul seria confuso; aqui se reporta la causa real.
+        idx_dim = int(self.index.get("dim", 0))
+        if idx_dim and idx_dim != self.embedder.dim():
+            raise RuntimeError(
+                f"DIMENSION MISMATCH: indice {block_id} embebido con "
+                f"{self.index.get('embed_model')} (dim={idx_dim}) pero el embedder "
+                f"activo es {self.embedder.backend()} (dim={self.embedder.dim()}). "
+                "Reindexa con el mismo backend o espera a que el rate limit del "
+                "proveedor se recupere.")
 
     # --- Consulta ---
 

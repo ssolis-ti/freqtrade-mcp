@@ -1,0 +1,18 @@
+feat: embeddings semanticos Google Gemini (free tier) + robustez
+
+- rag/embeddings.py: backend Gemini (gemini-embedding-001, dim 768) como
+  prioridad 1, antes del gateway y local-hash. Batching 32, sleep 3s entre
+  batches (respeta free tier 100 req/min), retry con backoff en 429
+  (parsea "retry in Ns"), validacion de dimension devuelta.
+- rag/retriever.py: detecta DIMENSION MISMATCH (indice 768 vs embedder 384)
+  con error claro en vez de matmul critptico.
+- tools/index_blocks.py: embedder fresco por bloque (un fallo transitorio de
+  rate limit no desactiva Gemini para los bloques siguientes).
+- tests/conftest.py: RAG_DATA_DIR temporal en pytest_configure; los tests
+  nunca tocan el indice de produccion (26/26 GREEN).
+- tools/benchmark_rag.py: embedder acorde al backend del indice.
+- .env.example + README: GEMINI_API_KEY, GEMINI_EMBED_MODEL, GEMINI_EMBED_DIM.
+
+Estado indices (2026-08-30): 00/01/02 en Gemini (dim 768); 03-11 en
+local-hash pendientes de reindexar cuando la cuota horaria del free tier
+(~1000 req/h) se recupere: python tools/index_blocks.py --force

@@ -35,7 +35,13 @@ def run_benchmark(block_id: str, top_k: int = 3) -> dict:
     items = json.loads(golden_path.read_text(encoding="utf-8"))
     items = [g for g in items if g["block"] == block_id]
 
-    embedder = Embedder(base_url="http://127.0.0.1:9", model="benchmark-local")
+    # El embedder DEBE coincidir con el backend del indice (misma dimension)
+    idx = json.loads((RAG_DATA_DIR / block_id / "index.json").read_text(encoding="utf-8"))
+    embed_model = idx.get("embed_model", "")
+    if embed_model.startswith("gemini:"):
+        embedder = Embedder()  # usa GEMINI_API_KEY del env (default)
+    else:
+        embedder = Embedder(gemini_key="")  # local-hash / gateway sin gemini
     r = Retriever(block_id, embedder=embedder)
 
     rec1 = rec3 = 0

@@ -13,7 +13,7 @@ from rag.indexer import index_block  # noqa: E402
 
 def _local_embedder():
     # Fuerza el fallback local: determinista y sin red
-    return Embedder(base_url="http://127.0.0.1:9", model="test-embed")
+    return Embedder(base_url="http://127.0.0.1:9", model="test-embed", gemini_key="")
 
 
 def test_index_pilot_block():
