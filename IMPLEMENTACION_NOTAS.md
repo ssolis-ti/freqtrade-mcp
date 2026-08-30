@@ -150,6 +150,34 @@ Integración real con freqtrade Docker dry-run pendiente (T326-T330, requiere OK
 - T329: registro Hermes (freq_despacho) + /reload-mcp.
 - T330: suite completa + commit.
 
+## Cierre de sesión — cómo retomar (2026-08-30)
+
+**Estado: base completa y operativa** (features 001-003 con mocks, 48/48 tests, tree limpio).
+
+### Para retomar en cualquier sesión (LLM o humano)
+
+1. Leer `docs/ARQUITECTURA.md` (documento maestro) + `README.md` (mapa).
+2. Entorno: `cd /c/Users/P0zcl/Desktop/proyectos/freq && unset PYTHONPATH` y usar
+   `.venv/Scripts/python.exe` (nunca `python` del PATH: es el venv de Hermes con mcp 2.0).
+3. Estado de índices: `tools/verificar_indices.py` (03-11 pueden estar en local-hash si
+   la cuota de Gemini no se ha reindexado: `tools/index_blocks.py --force` cuando haya cuota).
+
+### Próximos pasos pendientes (en orden)
+
+| # | Pendiente | Cómo | Requiere |
+|---|---|---|---|
+| 1 | Reindexar 03-11 con Gemini | `tools/index_blocks.py --force` (esperar cuota horaria) | tiempo (~1h de espera) |
+| 2 | Benchmark con Gemini | `tools/benchmark_rag.py 02-configuracion` (índice ya en gemini) | nada |
+| 3 | Rotar key de Gemini (higiene) | aistudio.google.com/apikey + actualizar `.env` | usuario |
+| 4 | Integración real freqtrade (T326-T330) | Docker dry-run + smoke + cadena + registro Hermes | OK usuario + Docker |
+| 5 | Registro Hermes (T033 + T329) | entries en config.yaml + `/reload-mcp` | OK usuario |
+
+### SDD
+
+- Specs: `specs/001-framework-rag-mcp/`, `specs/002-agentes-llm-bloque/`,
+  `specs/003-despacho-operativo/` (tasks T301-T325 hechas, T326-T330 pendientes).
+- Constitution: `.specify/memory/constitution.md`.
+
 ## Pendientes / siguientes pasos
 
 - **Registro en Hermes** (T033): entry `mcp_servers.freq_config` en `config.yaml` (paths
