@@ -1,0 +1,26 @@
+# Protección — este directorio
+# Config con credenciales, venvs, cachés y artefactos no se suben.
+
+# venv / python
+.venv/
+__pycache__/
+*.pyc
+
+# secretos y entorno local
+.env
+config-private.json
+config.yml
+
+# datos y artefactos
+user_data/data/
+user_data/backtest_results/
+*.feather
+*.parquet
+data/rag/
+
+# Spec-Kit / notas
+*.local
+
+# SO / editor
+Thumbs.db
+.DS_Store
