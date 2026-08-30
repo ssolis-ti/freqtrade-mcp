@@ -1,8 +1,0 @@
-docs: spec 003 despacho operativo (SDD completo)
-
-- specs/003-despacho-operativo/: spec (4 user stories, 8 FR, 5 SC), plan,
-  research (wrapper reutilizable, freqtrade Docker dry-run), contracts
-  (tools MCP del despacho, gate de permisos doble capa, plan del Manager,
-  cadena dry-run), tasks T301-T330 (tests con mock primero, integracion
-  real con OK del usuario).
-- README: estado actual apunta al spec 003.
