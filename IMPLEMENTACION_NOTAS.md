@@ -113,6 +113,15 @@
 - Feature 003 (embeddings semanticos locales, requiere OK instalacion).
 - Agentes para los otros 11 bloques (mismo patron; modelo por bloque via env).
 
+## Seguridad (2026-08-30)
+
+- La key real de Gemini se coló temporalmente en `.env.example` (archivo versionado)
+  durante las pruebas y quedó en el historial de git. **Purgada**: historial reescrito
+  con filter-branch (0 coincidencias de la key en todo el historial), refs originales
+  eliminados, gc ejecutado. El repo no tiene remoto (la key nunca salió del equipo).
+- `.env.example` usa placeholders; la key real vive SOLO en `.env` (gitignored).
+- Recomendado: rotar la key en https://aistudio.google.com/apikey (gratis, 1 min).
+
 ## Pendientes / siguientes pasos
 
 - **Registro en Hermes** (T033): entry `mcp_servers.freq_config` en `config.yaml` (paths
