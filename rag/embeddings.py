@@ -44,6 +44,11 @@ class Embedder:
         self._gemini_key = os.getenv("GEMINI_API_KEY", "") if gemini_key is None else gemini_key
         self._gemini_model = os.getenv("GEMINI_EMBED_MODEL", "gemini-embedding-001")
         self._gemini_dim = int(os.getenv("GEMINI_EMBED_DIM", "768"))
+        # La dimension reportada debe reflejar el backend prioritario ANTES de
+        # la primera llamada (el check de Retriever lo valida al construirse).
+        if self._gemini_key:
+            self._dim = self._gemini_dim
+            self._backend = "gemini"
 
     # --- API publica ---
 

@@ -31,7 +31,15 @@ class Retriever:
         self.index = json.loads(self.index_path.read_text(encoding="utf-8"))
         self.chunks = json.loads(self.chunks_path.read_text(encoding="utf-8"))
         self.vectors = np.load(self.vectors_path)
-        self.embedder = embedder or Embedder()
+        # Auto-deteccion de backend: si no se inyecta embedder, usar el mismo
+        # backend con que se indexo el bloque (gemini o local-hash).
+        if embedder is None:
+            idx_model = str(self.index.get("embed_model", ""))
+            if idx_model.startswith("gemini:"):
+                embedder = Embedder()
+            else:
+                embedder = Embedder(gemini_key="")
+        self.embedder = embedder
         # Validacion: la dimension del embedder debe coincidir con el indice.
         # Si no (p.ej. Gemini en rate limit -> degrade a local-hash), el error
         # de matmul seria confuso; aqui se reporta la causa real.
@@ -58,6 +66,15 @@ class Retriever:
         qv = np.asarray(self.embedder.embed_query(query), dtype=np.float32)
         if qv.ndim == 1:
             qv = qv.reshape(1, -1)
+        # Validacion POST-embed: el backend pudo degradar durante la llamada
+        # (p.ej. Gemini en rate limit -> local-hash 384 vs indice 768).
+        if qv.shape[1] != self.vectors.shape[1]:
+            raise RuntimeError(
+                f"DIMENSION MISMATCH (post-embed): indice {self.block_id} es "
+                f"dim={self.vectors.shape[1]} ({self.index.get('embed_model')}) "
+                f"pero el embedder devolvio dim={qv.shape[1]} "
+                f"({self.embedder.backend()}). El proveedor de embeddings pudo "
+                "estar en rate limit; reintenta en unos minutos.")
         qnorm = np.linalg.norm(qv)
         if qnorm == 0:
             return []

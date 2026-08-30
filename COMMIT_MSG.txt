@@ -1,0 +1,16 @@
+fix: auto-deteccion de backend por indice + validacion post-embed
+
+- rag/retriever.py: si no se inyecta embedder, usa el MISMO backend con que
+  se indexo el bloque (gemini o local-hash) — cada bloque se consulta con su
+  propia dimension, sin errores de matmul.
+- Validacion post-embed: si el proveedor degrada DURANTE la llamada (p.ej.
+  Gemini en rate limit -> local-hash 384 vs indice 768), error claro en vez
+  de matmul critptico.
+- rag/embeddings.py: la dimension reportada refleja el backend prioritario
+  desde el constructor (no tras la primera llamada).
+- tools/demo_entender_doc.py: demo "LLM ve y entiende la doc" (agente del
+  bloque 04, responde con citas reales).
+- tools/verificar_indices.py: diagnostico de consistencia index.json vs
+  vectors.npy.
+
+Validado: demo responde con fundamento y citas; 26/26 tests GREEN.
