@@ -122,6 +122,34 @@
 - `.env.example` usa placeholders; la key real vive SOLO en `.env` (gitignored).
 - Recomendado: rotar la key en https://aistudio.google.com/apikey (gratis, 1 min).
 
+## Feature 003 — Despacho operativo (2026-08-30)
+
+**Estado: IMPLEMENTADO con mocks (48/48 tests; smoke MCP despacho OK).**
+Integración real con freqtrade Docker dry-run pendiente (T326-T330, requiere OK).
+
+### Entregado
+
+- `despacho/wrapper.py` — FreqtradeClient (19 tools REST extraídas del prototype, auth
+  JWT, relogin 401, verificar_dry_run).
+- `despacho/permisos.py` — gate de OK (regla dura, doble capa agente+Manager).
+- `despacho/manager.py` — plan_mision (LLM gateway + fallback heurístico),
+  decidir_dry_run solo con backtesting+riesgo OK, bloqueos.
+- `despacho/cadena.py` — cadena dry-run (download-data → backtesting con umbrales
+  PF≥1.3/DD≤30% → hyperopt → revisar_riesgo; subprocess freqtrade).
+- `servers/despacho_mcp.py` + `run_despacho.py` — MCP del despacho (19 tools).
+- Tests: test_wrapper (6), test_permisos (4), test_manager (6), test_cadena (6).
+- `tools/smoke_despacho.py` — smoke con mocks: TOOLS 19, gate OK verificado
+  (entrar sin OK → ToolError), plan_mision 3 pasos.
+- `.env.example` + FREQTRADE_*, CADENA_PF_MIN/DD_MAX.
+
+### Pendiente (integración real, requiere OK del usuario)
+
+- T326: `tools/levantar_freqtrade.sh` — docker run freqtrade dry-run con REST.
+- T327: smoke real (bot_status/profit; forceenter con OK en par de prueba).
+- T328: cadena real en dry-run.
+- T329: registro Hermes (freq_despacho) + /reload-mcp.
+- T330: suite completa + commit.
+
 ## Pendientes / siguientes pasos
 
 - **Registro en Hermes** (T033): entry `mcp_servers.freq_config` en `config.yaml` (paths

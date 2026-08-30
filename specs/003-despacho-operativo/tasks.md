@@ -5,25 +5,25 @@
 
 ## Test-Driven (Red antes de implementar) ⚠️
 
-- [ ] T301 [P] [foundation] Tests que FALLAN en tests/test_wrapper.py (mocks httpx: auth JWT, relogin 401, 19 tools responden)
-- [ ] T302 [P] [foundation] Tests que FALLAN en tests/test_permisos.py (gate: tools de ejecución exigen OK; sin OK → PermissionError)
-- [ ] T303 [P] [foundation] Tests que FALLAN en tests/test_manager.py (plan_mision descompone; decidir_dry_run solo con backtest+riesgo OK)
-- [ ] T304 [P] [foundation] Tests que FALLAN en tests/test_cadena.py (cadena con subprocess mock; umbrales PF/drawdown)
+- [X] T301 [P] [foundation] Tests que FALLAN en tests/test_wrapper.py (mocks httpx: auth JWT, relogin 401, 19 tools responden)
+- [X] T302 [P] [foundation] Tests que FALLAN en tests/test_permisos.py (gate: tools de ejecución exigen OK; sin OK → PermissionError)
+- [X] T303 [P] [foundation] Tests que FALLAN en tests/test_manager.py (plan_mision descompone; decidir_dry_run solo con backtest+riesgo OK)
+- [X] T304 [P] [foundation] Tests que FALLAN en tests/test_cadena.py (cadena con subprocess mock; umbrales PF/drawdown)
 
 ---
 
 ## Phase 1: Setup
 
-- [ ] T305 Actualizar `.env.example` con FREQTRADE_URL/USER/PASS/DRY_RUN + umbrales cadena
+- [X] T305 Actualizar `.env.example` con FREQTRADE_URL/USER/PASS/DRY_RUN + umbrales cadena
 
 ---
 
 ## Phase 2: Foundational (bloquea las user stories)
 
-- [ ] T306 Crear `despacho/wrapper.py` — extraer las 19 funciones del wrapper REST (lógica pura, httpx, auth JWT, relogin 401), importables y mockeables
-- [ ] T307 Crear `despacho/permisos.py` — `requiere_ok(tool)` + `autorizar(tool, ok_usuario)` (doble capa: agente + Manager)
-- [ ] T308 Crear `despacho/manager.py` — `plan_mision(mision)` → plan JSON {pasos por dominio, decidir_dry_run, bloqueos}
-- [ ] T309 Crear `despacho/cadena.py` — flujo CLI: download-data → backtesting → hyperopt → revisar_riesgo (subprocess freqtrade, umbrales env)
+- [X] T306 Crear `despacho/wrapper.py` — extraer las 19 funciones del wrapper REST (lógica pura, httpx, auth JWT, relogin 401), importables y mockeables
+- [X] T307 Crear `despacho/permisos.py` — `requiere_ok(tool)` + `autorizar(tool, ok_usuario)` (doble capa: agente + Manager)
+- [X] T308 Crear `despacho/manager.py` — `plan_mision(mision)` → plan JSON {pasos por dominio, decidir_dry_run, bloqueos}
+- [X] T309 Crear `despacho/cadena.py` — flujo CLI: download-data → backtesting → hyperopt → revisar_riesgo (subprocess freqtrade, umbrales env)
 
 **Checkpoint**: despacho construible y testeable con mocks.
 
@@ -34,9 +34,9 @@
 **Goal**: El agente invoca las tools del wrapper contra freqtrade (dry-run).
 **Independent Test**: tests/test_wrapper.py GREEN con mocks; smoke real cuando haya freqtrade.
 
-- [ ] T310 [US1] `despacho/wrapper.py` completo: 11 lectura + 8 ejecución, con relogin en 401 y timeout
-- [ ] T311 [US1] `despacho/permisos.py` integrado: tools de ejecución pasan por `autorizar()`
-- [ ] T312 [US1] Verificar GREEN tests/test_wrapper.py + test_permisos.py
+- [X] T310 [US1] `despacho/wrapper.py` completo: 11 lectura + 8 ejecución, con relogin en 401 y timeout
+- [X] T311 [US1] `despacho/permisos.py` integrado: tools de ejecución pasan por `autorizar()`
+- [X] T312 [US1] Verificar GREEN tests/test_wrapper.py + test_permisos.py
 
 **Checkpoint**: US1 con mocks.
 
@@ -47,10 +47,10 @@
 **Goal**: Manager descompone misiones y decide dry-run con OK de dominios.
 **Independent Test**: tests/test_manager.py GREEN.
 
-- [ ] T313 [US2] `plan_mision(mision)`: LLM gateway → pasos {dominio, tool, params}; mapeo dominio→bloque documental
-- [ ] T314 [US2] `decidir_dry_run`: SOLO si backtest + riesgo OK; bloqueos con motivo
-- [ ] T315 [US2] `estado_plan()`: consulta de estado del plan
-- [ ] T316 [US2] Verificar GREEN tests/test_manager.py
+- [X] T313 [US2] `plan_mision(mision)`: LLM gateway → pasos {dominio, tool, params}; mapeo dominio→bloque documental
+- [X] T314 [US2] `decidir_dry_run`: SOLO si backtest + riesgo OK; bloqueos con motivo
+- [X] T315 [US2] `estado_plan()`: consulta de estado del plan
+- [X] T316 [US2] Verificar GREEN tests/test_manager.py
 
 **Checkpoint**: US2.
 
@@ -61,11 +61,11 @@
 **Goal**: Flujo completo datos→estrategia→backtest→hyperopt→riesgo en dry-run.
 **Independent Test**: tests/test_cadena.py GREEN con subprocess mock.
 
-- [ ] T317 [US3] `cadena.py`: download-data (subprocess freqtrade) → data/
-- [ ] T318 [US3] backtesting → métricas {profit_factor, drawdown}; umbrales env (PF≥1.3, DD≤30)
-- [ ] T319 [US3] hyperopt si métricas OK → config optimizada
-- [ ] T320 [US3] revisar_riesgo (leverage/stoploss) → OK/rechazo
-- [ ] T321 [US3] Verificar GREEN tests/test_cadena.py
+- [X] T317 [US3] `cadena.py`: download-data (subprocess freqtrade) → data/
+- [X] T318 [US3] backtesting → métricas {profit_factor, drawdown}; umbrales env (PF≥1.3, DD≤30)
+- [X] T319 [US3] hyperopt si métricas OK → config optimizada
+- [X] T320 [US3] revisar_riesgo (leverage/stoploss) → OK/rechazo
+- [X] T321 [US3] Verificar GREEN tests/test_cadena.py
 
 **Checkpoint**: US3 con mocks.
 
@@ -76,10 +76,10 @@
 **Goal**: Despacho expuesto como MCP y registrable en Hermes.
 **Independent Test**: smoke stdio del despacho (tools listadas).
 
-- [ ] T322 Crear `servers/despacho_mcp.py` — FastMCP: tools lectura + ejecución (gate) + plan_mision + estado_plan
-- [ ] T323 Crear `servers/run_despacho.py` — entrypoint stdio
-- [ ] T324 Smoke stdio: `tools/list` → tools del despacho; llamadas con mocks
-- [ ] T325 Documentar registro Hermes (freq_despacho) en README + notas
+- [X] T322 Crear `servers/despacho_mcp.py` — FastMCP: tools lectura + ejecución (gate) + plan_mision + estado_plan
+- [X] T323 Crear `servers/run_despacho.py` — entrypoint stdio
+- [X] T324 Smoke stdio: `tools/list` → tools del despacho; llamadas con mocks
+- [X] T325 Documentar registro Hermes (freq_despacho) en README + notas
 
 **Checkpoint**: US4.
 

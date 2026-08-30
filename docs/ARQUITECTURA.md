@@ -107,12 +107,22 @@ LLM pregunta: "What does backtesting require to work?"
 | `retriever.py` | `Retriever(block_id)` → `query(q, top_k, min_score)` por coseno numpy; no-hits `[]`; auto-detección de backend según el índice; validación post-embed |
 | `agent.py` | `AgenteLLM(block_id)` → `responder(query, top_k)` con citas; `health()`. Rechazo sin hits; degrada a hits crudos si el LLM falla; modelo por env |
 
+### `despacho/` — capa de operación (feature 003, con mocks validado)
+
+| Archivo | Responsabilidad |
+|---|---|
+| `wrapper.py` | `FreqtradeClient`: las 19 tools de la REST API (extraídas del prototype), auth JWT con relogin en 401, `verificar_dry_run()` |
+| `permisos.py` | Gate de OK (regla dura constitution III): `requiere_ok()` + `autorizar()` — tools de ejecución exigen OK del usuario, doble capa (agente + Manager) |
+| `manager.py` | `Manager`: `plan_mision()` descompone misiones en pasos por dominio (LLM gateway, fallback heurístico); `decidir_dry_run` SOLO si backtesting + riesgo OK |
+| `cadena.py` | Cadena dry-run: download-data → backtesting (umbrales PF≥1.3, DD≤30%) → hyperopt → revisar_riesgo (subprocess freqtrade CLI) |
+
 ### `servers/` — MCP (FastMCP, stdio)
 
 | Archivo | Tools expuestas |
 |---|---|
 | `run_bloque.py <id>` → `block_mcp.build_mcp` | `consultar_docs(query, top_k)`, `health()` |
 | `run_agente.py <id>` → `agent_mcp.build_agent_mcp` | `responder(query, top_k)`, `consultar_docs(query, top_k)`, `health()` |
+| `run_despacho.py` → `despacho_mcp.build_despacho_mcp` | lectura (`bot_status`, `bot_profit`, `bot_balance`, `bot_whitelist`, `bot_blacklist`, `bot_count`, `bot_logs`, `bot_ping`, `bot_show_config`), ejecución con gate (`entrar`, `salir`, `vetar`, `bloquear`, `detener_compras`, `arrancar`, `detener`), Manager (`plan_mision`, `estado_plan`), `cadena_dry_run` |
 
 ### `tools/` — CLI y utilidades
 
@@ -143,6 +153,10 @@ LLM pregunta: "What does backtesting require to work?"
 | `test_mcp.py` (4) | Tools listadas, consulta, no-hits, health |
 | `test_agent.py` (5) | responder con citas (mocks, sin gasto), sin_hits no llama al LLM, degradación, health, modelo por env |
 | `test_benchmark.py` (3) | Golden set válido, métricas, reporte JSON |
+| `test_wrapper.py` (6) | Wrapper REST con httpx.MockTransport: auth JWT, lectura, forceenter, dry_run, relogin en 401 |
+| `test_permisos.py` (4) | Gate de OK: solo tools de ejecución exigen OK; sin OK → PermissionError |
+| `test_manager.py` (6) | plan_mision descompone, decidir_dry_run solo con backtest+riesgo OK, bloqueos, fallback heurístico, gate en delegar |
+| `test_cadena.py` (6) | Cadena con subprocess mock: descarga, umbrales PF/DD, corta en fallo |
 
 ### `prototype/` — wrapper REST de freqtrade (las "manos", aún no integrado)
 
@@ -311,13 +325,14 @@ CHUNK_OVERLAP_CHARS=200
 |---|---|
 | Corpus (2 mirrors, 95 .md, ~2 MB) | Operativo |
 | Indexación 12 bloques | Operativa (00, 01, 02 en Gemini semántico; 03-11 en local-hash, pendientes de reindexar cuando la cuota horaria de Gemini se recupere) |
-| RAG por bloque (consultar_docs, health) | Operativo, 26/26 tests |
+| RAG por bloque (consultar_docs, health) | Operativo, 48/48 tests |
 | Agente LLM por bloque (responder + citas) | Operativo (patrón validado en piloto; replicable por bloque vía env) |
 | MCP stdio | Operativo (smokes reales OK) |
+| Despacho (wrapper + permisos + Manager + cadena) | **Implementado con mocks, 22 tests GREEN + smoke OK**; pendiente integración real con freqtrade Docker (T326-T330, requiere OK) |
 | Benchmark | Baseline local-hash: recall@1=0.30, recall@3=0.85, MRR=0.567 (falta medir con Gemini) |
-| Wrapper REST freqtrade (prototype/) | Construido, 19 tools, validado — NO integrado aún |
+| Wrapper REST freqtrade (despacho/wrapper.py) | Integrado en la capa despacho (antes: aislado en prototype/) |
 | Registro en Hermes | Pendiente (requiere OK del usuario) |
-| **Operación de trading (feature 003)** | **Pendiente**: conectar agentes ↔ wrapper REST + Manager orquestador + cadena dry-run → live (solo con OK explícito del usuario) |
+| **Operación de trading real** | **Pendiente**: integración con freqtrade Docker dry-run + registro Hermes |
 
 ### Qué puede hacer un LLM HOY
 
@@ -325,13 +340,14 @@ CHUNK_OVERLAP_CHARS=200
 - Preguntar en lenguaje natural y recibir respuestas fundamentadas con citas.
 - Verificar el estado de los índices (health).
 - Medir la calidad de recuperación (benchmark).
+- **Despacho (con freqtrade corriendo)**: leer estado/profit/balance/whitelist, planificar
+  misiones con el Manager, ejecutar cadena dry-run. Las tools de ejecución (entrar/salir/
+  vetar/bloquear) exigen OK explícito del usuario — sin OK, PermissionError.
 
 ### Qué NO puede hacer todavía
 
-- Ejecutar órdenes sobre freqtrade (forceenter/forceexit/blacklist...) — el wrapper
-  existe pero no está conectado a los agentes.
-- Orquestar el flujo completo (datos → estrategia → backtest → hyperopt → riesgo).
-- Pasar de dry-run a live (regla dura: solo con OK explícito del usuario).
+- Operar contra freqtrade REAL (falta levantar la instancia Docker dry-run y registrarla).
+- Pasar de dry-run a live (regla dura: solo con OK explícito del usuario, feature aparte).
 
 ---
 

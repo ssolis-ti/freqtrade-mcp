@@ -1,0 +1,20 @@
+feat: despacho operativo con mocks (feature 003, T301-T325)
+
+- despacho/wrapper.py: FreqtradeClient (19 tools REST extraidas del prototype,
+  auth JWT con relogin en 401, verificar_dry_run)
+- despacho/permisos.py: gate de OK (regla dura constitution III, doble capa)
+- despacho/manager.py: plan_mision (LLM gateway + fallback heuristico),
+  decidir_dry_run solo con backtesting+riesgo OK, bloqueos
+- despacho/cadena.py: cadena dry-run (download-data -> backtesting con umbrales
+  PF>=1.3 / DD<=30% -> hyperopt -> revisar_riesgo)
+- servers/despacho_mcp.py + run_despacho.py: MCP del despacho (19 tools:
+  9 lectura + 7 ejecucion con gate + Manager + cadena)
+- tests: test_wrapper (6), test_permisos (4), test_manager (6), test_cadena (6)
+  -> 48/48 GREEN totales
+- tools/smoke_despacho.py: smoke con mocks (TOOLS 19, gate OK verificado,
+  plan_mision 3 pasos)
+- .env.example: FREQTRADE_*, CADENA_PF_MIN/DD_MAX
+- Docs actualizados (ARQUITECTURA, README, notas)
+
+Pendiente (requiere OK usuario): integracion real con freqtrade Docker dry-run
+(T326-T330): levantar instancia, smoke real, cadena real, registro Hermes.
