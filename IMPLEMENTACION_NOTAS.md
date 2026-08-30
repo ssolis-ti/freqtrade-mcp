@@ -75,6 +75,44 @@
   Implicacion: para operar el RAG en espanol de forma robusta, el gateway es requerido,
   no opcional.
 
+## Feature 002 — Agentes LLM por bloque (2026-08-30)
+
+**Estado: IMPLEMENTADO y validado.** 26/26 tests (18 feature 001 + 8 feature 002).
+
+### Verificado en vivo
+
+- **Gateway LLM `:4000` operativo**: 21 modelos (deepseek-via-inference default, probado
+  con respuesta real). Master key local en litellm.env → copiada a `.env` del proyecto
+  (gitignored) via `tools/setup_env_key.py`.
+- **Pitfall confirmado**: `max_tokens` bajo → `content: ''` (el razonamiento consume el
+  presupuesto). El agente usa `max_tokens=2000` y extrae SOLO `message.content`
+  (ignora `reasoning_content`).
+- **Embeddings del gateway rotos**: `nvidia-embed` (nv-embedqa-mistral-7b-v2) → 404/429
+  (no desplegado en la cuenta NIM). inference.net → 403 al listar sin gastar. → se
+  mantiene local-hash; embeddings semanticos locales = feature 003 (requiere OK para
+  instalar sentence-transformers ~100MB).
+- **Smoke agente MCP stdio OK**: `responder` responde con citas reales y fundamento;
+  sin hits → `sin_hits` (rechazo sin llamar al LLM).
+- **Benchmark baseline (local-hash)**: recall@1=0.30, recall@3=0.85, MRR=0.567 sobre
+  20 preguntas del golden set. Reporte en `data/benchmark/02-configuracion.json`.
+  Línea de comparación para embeddings semanticos (feature 003).
+
+### Entregado
+
+- `rag/agent.py` (AgenteLLM), `servers/agent_mcp.py` (responder/consultar_docs/health),
+  `servers/run_agente.py`, `tools/benchmark_rag.py`, `tools/make_golden_set.py`,
+  `tools/smoke_agente_stdio.py`, `tools/setup_env_key.py`, `tools/golden_set.json`,
+  tests `test_agent.py` (5) + `test_benchmark.py` (3).
+- `.env.example` ampliado (LLM_BASE_URL, LLM_API_KEY, AGENT_MODEL_*).
+- SDD completo en `specs/002-agentes-llm-bloque/` (spec, plan, research, contracts, tasks 26/26).
+- README: sección "Agentes LLM por bloque".
+
+### Pendientes
+
+- Registro en Hermes (T033 combinado 001+002): entry `freq_config` → `run_agente.py`.
+- Feature 003 (embeddings semanticos locales, requiere OK instalacion).
+- Agentes para los otros 11 bloques (mismo patron; modelo por bloque via env).
+
 ## Pendientes / siguientes pasos
 
 - **Registro en Hermes** (T033): entry `mcp_servers.freq_config` en `config.yaml` (paths

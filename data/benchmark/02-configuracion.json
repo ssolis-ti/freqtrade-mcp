@@ -1,0 +1,151 @@
+{
+ "block": "02-configuracion",
+ "top_k": 3,
+ "n_preguntas": 20,
+ "recall@1": 0.3,
+ "recall@3": 0.85,
+ "mrr": 0.567,
+ "embed_model": "local-hash",
+ "detalle": [
+  {
+   "query": "Segun la documentacion, que dice sobre The Freqtrade configuration file? Contexto: The bot",
+   "expected": "1ffd2cf3739c",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.682
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Environment variables? Contexto: Set options in the",
+   "expected": "c095baf44c42",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.5161
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Multiple configuration files? Contexto: Multiple co",
+   "expected": "ae78ade6e3b1",
+   "found": true,
+   "rank": 0,
+   "top_score": 0.5473
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Editor autocomplete and validation? Contexto: If yo",
+   "expected": "c477183067e9",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.6089
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Configuration option prevalence? Contexto: The prev",
+   "expected": "f15deacc1e83",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.4679
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Parameters table? Contexto: | Parameter | Descripti",
+   "expected": "6fdca84b7896",
+   "found": false,
+   "rank": null,
+   "top_score": 0.2626
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Parameters in the strategy? Contexto: The following",
+   "expected": "6c980136e4fd",
+   "found": true,
+   "rank": 0,
+   "top_score": 0.7828
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Configuring amount per trade? Contexto: There are s",
+   "expected": "5d9682b4fceb",
+   "found": true,
+   "rank": 0,
+   "top_score": 0.7335
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Minimum trade stake? Contexto: The minimum stake am",
+   "expected": "fd0b01a569c4",
+   "found": true,
+   "rank": 0,
+   "top_score": 0.608
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Dry-run wallet? Contexto: When running in dry-run m",
+   "expected": "253abaad06f5",
+   "found": true,
+   "rank": 2,
+   "top_score": 0.5902
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Tradable balance? Contexto: By default, the bot ass",
+   "expected": "a6c564dfeac4",
+   "found": true,
+   "rank": 0,
+   "top_score": 0.5599
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Assign available Capital? Contexto: To fully utiliz",
+   "expected": "684007b1e0b7",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.4157
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Amend last stake amount? Contexto: Assuming we have",
+   "expected": "e90702213b3b",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.5392
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Static stake amount? Contexto: The `stake_amount` c",
+   "expected": "17bdee867e4e",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.5557
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Dynamic stake amount? Contexto: Alternatively, you ",
+   "expected": "5465b08fe92b",
+   "found": false,
+   "rank": null,
+   "top_score": 0.5532
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Dynamic stake amount with position adjustment? Cont",
+   "expected": "599097f6b270",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.5188
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Understand minimal_roi? Contexto: The `minimal_roi`",
+   "expected": "e818906cf3a8",
+   "found": true,
+   "rank": 0,
+   "top_score": 0.6383
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Understand force_entry_enable? Contexto: The `force",
+   "expected": "5f677af69efa",
+   "found": false,
+   "rank": null,
+   "top_score": 0.407
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Ignoring expired candles? Contexto: When working wi",
+   "expected": "55380c6adbab",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.4608
+  },
+  {
+   "query": "Segun la documentacion, que dice sobre Understand order_types? Contexto: The `order_types`",
+   "expected": "7965f61f0096",
+   "found": true,
+   "rank": 1,
+   "top_score": 0.3828
+  }
+ ]
+}

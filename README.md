@@ -166,6 +166,50 @@ El framework es parametrizado por bloque: escalar a los 12 = indexar los demás 
 levantar un server por cada uno. Sin rediseño (FR-008). Detalle de diseño en
 `specs/001-framework-rag-mcp/` (spec-driven, Spec-Kit).
 
+## Agentes LLM por bloque (cerebro + voz)
+
+Sobre el RAG se construye la capa de **agentes LLM**: cada bloque se expone como un MCP
+server que responde preguntas del dominio con **fundamento y citas** (el RAG es la única
+fuente; el LLM del gateway LiteLLM/Bifrost `:4000` redacta la respuesta).
+
+### Reglas de diseño (constitution)
+
+- Sin hits suficientes en el bloque → el agente **rechaza explícitamente** (no inventa,
+  no cruza bloques, no gasta crédito llamando al LLM).
+- Si el LLM falla → **degrada a los hits crudos** del RAG (nunca alucina).
+- Modelo configurable por bloque vía env: `AGENT_MODEL_<BLOQUE>` (default
+  `AGENT_MODEL_DEFAULT=deepseek-via-inference`).
+
+### Uso
+
+```bash
+# Levantar el agente del bloque (MCP stdio)
+python servers/run_agente.py 02-configuracion
+# Tools: responder(query, top_k) | consultar_docs(query, top_k) | health()
+
+# Benchmark de calidad del RAG (recall@1/@3, MRR) — baseline para comparar configs
+python tools/benchmark_rag.py 02-configuracion
+# → data/benchmark/02-configuracion.json
+```
+
+Config en `.env` (ver `.env.example`): `LLM_BASE_URL`, `LLM_API_KEY` (key local del
+gateway, gitignored), `AGENT_MODEL_DEFAULT`, `AGENT_MODEL_<BLOQUE>` opcional.
+
+### Registro en Hermes (agente)
+
+```yaml
+mcp_servers:
+  freq_config:
+    command: <proyecto>/.venv/Scripts/python.exe
+    args:
+      - <proyecto>/servers/run_agente.py
+      - 02-configuracion
+    enabled: true
+```
+
+Tools expuestas: `mcp_freq_config_responder`, `mcp_freq_config_consultar_docs`,
+`mcp_freq_config_health`. Detalle en `specs/002-agentes-llm-bloque/`.
+
 ## Estado actual
 
 **Depurando la idea y el prototipo.** Este documento queda en modo **idea** mientras se

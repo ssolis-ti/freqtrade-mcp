@@ -1,0 +1,162 @@
+[
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre The Freqtrade configuration file? Contexto: The bot uses a set of configuration parameters during its operation that all together conform to the bot configuration. ",
+  "expected_chunk_id": "1ffd2cf3739cbf5cbf8881e0fea2320158201e8c",
+  "heading": "The Freqtrade configuration file",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Environment variables? Contexto: Set options in the Freqtrade configuration via environment variables. This takes priority over the corresponding value i",
+  "expected_chunk_id": "c095baf44c42ee99a5d2ef2fbf4e65fa2b9ddcd6",
+  "heading": "Environment variables",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Multiple configuration files? Contexto: Multiple configuration files can be specified and used by the bot or the bot can read its configuration parameters from ",
+  "expected_chunk_id": "ae78ade6e3b1ff500eed740bacc0e4fee6018be7",
+  "heading": "Multiple configuration files",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Editor autocomplete and validation? Contexto: If you are using an editor that supports JSON schema, you can use the schema provided by Freqtrade to get autocompletion",
+  "expected_chunk_id": "c477183067e9bfeba04c79cc250155d53dbb5897",
+  "heading": "Editor autocomplete and validation",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Configuration option prevalence? Contexto: The prevalence for all Options is as follows: * CLI arguments override any other option * [Environment Variables](#envir",
+  "expected_chunk_id": "f15deacc1e83060b7254b81d72b840f2a557f130",
+  "heading": "Configuration option prevalence",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Parameters table? Contexto: | Parameter | Description | |------------|-------------| | `max_open_trades` | **Required.** Number of open trades your ",
+  "expected_chunk_id": "6fdca84b7896dda25e2205ae8e75455f423a8fe0",
+  "heading": "Parameters table",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Parameters in the strategy? Contexto: The following parameters can be set in the configuration file or strategy. Values set in the configuration file always o",
+  "expected_chunk_id": "6c980136e4fde38ba6ce8bca2e7e3aa2dc199df9",
+  "heading": "Parameters in the strategy",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Configuring amount per trade? Contexto: There are several methods to configure how much of the stake currency the bot will use to enter a trade. All methods res",
+  "expected_chunk_id": "5d9682b4fcebaa8ba160c35f2967be57b101401f",
+  "heading": "Configuring amount per trade",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Minimum trade stake? Contexto: The minimum stake amount will depend on exchange and pair and is usually listed in the exchange support pages. Assuming ",
+  "expected_chunk_id": "fd0b01a569c4230f183dd948b132fa9051066305",
+  "heading": "Minimum trade stake",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Dry-run wallet? Contexto: When running in dry-run mode, the bot will use a simulated wallet to execute trades. The starting balance of this wallet",
+  "expected_chunk_id": "253abaad06f51bc39cf3dcbf371345e1c3925472",
+  "heading": "Dry-run wallet",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Tradable balance? Contexto: By default, the bot assumes that the `complete amount - 1%` is at it's disposal, and when using [dynamic stake amount](#",
+  "expected_chunk_id": "a6c564dfeac41d88d41e40a9bbb0de73175725b8",
+  "heading": "Tradable balance",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Assign available Capital? Contexto: To fully utilize compounding profits when using multiple bots on the same exchange account, you'll want to limit each bo",
+  "expected_chunk_id": "684007b1e0b715e8cc674c0c0cc38ff3a85fbe5f",
+  "heading": "Assign available Capital",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Amend last stake amount? Contexto: Assuming we have the tradable balance of 1000 USDT, `stake_amount=400`, and `max_open_trades=3`. The bot would open 2 tr",
+  "expected_chunk_id": "e90702213b3b852e5cddeb8bc3553bfe8ae02765",
+  "heading": "Amend last stake amount",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Static stake amount? Contexto: The `stake_amount` configuration statically configures the amount of stake-currency your bot will use for each trade. Th",
+  "expected_chunk_id": "17bdee867e4e27405ae6f49af175729aa627e813",
+  "heading": "Static stake amount",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Dynamic stake amount? Contexto: Alternatively, you can use a dynamic stake amount, which will use the available balance on the exchange, and divide that",
+  "expected_chunk_id": "5465b08fe92b92413980b0fb8f1abfc8481d6d0c",
+  "heading": "Dynamic stake amount",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Dynamic stake amount with position adjustment? Contexto: When you want to use position adjustment with unlimited stakes, you must also implement `custom_stake_amount` to a retur",
+  "expected_chunk_id": "599097f6b2708064090e24b5f914f6604498a846",
+  "heading": "Dynamic stake amount with position adjustment",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Understand minimal_roi? Contexto: The `minimal_roi` configuration parameter is a JSON object where the key is a duration in minutes and the value is the m",
+  "expected_chunk_id": "e818906cf3a83329bb1b6cc1e172e0cde410d1a4",
+  "heading": "Understand minimal_roi",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Understand force_entry_enable? Contexto: The `force_entry_enable` configuration parameter enables the usage of force-enter (`/forcelong`, `/forceshort`) commands",
+  "expected_chunk_id": "5f677af69efa76fddf274fc9e0b51802f3b74095",
+  "heading": "Understand force_entry_enable",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Ignoring expired candles? Contexto: When working with larger timeframes (for example 1h or more) and using a low `max_open_trades` value, the last candle ca",
+  "expected_chunk_id": "55380c6adbab1379ce1783924b78b71754837b75",
+  "heading": "Ignoring expired candles",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ },
+ {
+  "block": "02-configuracion",
+  "query": "Segun la documentacion, que dice sobre Understand order_types? Contexto: The `order_types` configuration parameter maps actions (`entry`, `exit`, `stoploss`, `emergency_exit`, `force_exit`, `fo",
+  "expected_chunk_id": "7965f61f00967d894c2e6acf58c0ac768ffd0ef1",
+  "heading": "Understand order_types",
+  "mirror": "fuente",
+  "path": "configuration.md"
+ }
+]

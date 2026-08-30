@@ -1,5 +1,5 @@
 {
-  "feature_directory": "specs/001-framework-rag-mcp",
-  "name": "framework-rag-mcp",
-  "number": 1
+  "feature_directory": "specs/002-agentes-llm-bloque",
+  "name": "agentes-llm-bloque",
+  "number": 2
 }
