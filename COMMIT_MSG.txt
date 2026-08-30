@@ -1,9 +1,0 @@
-docs: documento maestro de arquitectura + README al estado real
-
-- docs/ARQUITECTURA.md: documento maestro autocontenido para cualquier LLM o
-  desarrollador (que es, arquitectura en capas, 12 bloques, modulos rag/servers/
-  tools/tests, formatos de datos, backends de embeddings, config .env, forma de
-  uso con comandos, estado actual, gobernanza SDD, problemas conocidos).
-- README.md: pasa de "idea + prototipo" a "base implementada y operativa";
-  apunta al documento maestro; estado actual real (features 001+002, 26/26 tests).
-- .env.example: key real de Gemini reemplazada por placeholder (seguridad).
