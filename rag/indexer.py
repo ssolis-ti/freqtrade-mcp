@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import time
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -77,7 +78,28 @@ def index_block(block: Block, force: bool = False,
         embedder = Embedder()
 
     texts = [c.text for c in chunks]
-    vectors = np.asarray(embedder.embed_texts(texts), dtype=np.float32)
+    crudos = embedder.embed_texts(texts)
+
+    # Si el backend se degrada A MITAD del corpus (p.ej. Gemini agota la cuota
+    # y el Embedder cae a local-hash), los primeros lotes tienen dim 768 y los
+    # ultimos 384. numpy fallaba con "inhomogeneous shape" y el bloque se
+    # quedaba sin reindexar. El fallback ya esta latcheado, asi que re-embeber
+    # produce un corpus homogeneo con el backend degradado.
+    dims = {len(v) for v in crudos}
+    if len(dims) > 1:
+        warnings.warn(
+            f"Bloque {block.id}: el backend de embeddings se degrado a mitad "
+            f"del corpus (dimensiones {sorted(dims)}). Re-embebiendo los "
+            f"{len(texts)} chunks con '{embedder.model_name()}' para dejar el "
+            "indice homogeneo.", RuntimeWarning, stacklevel=2)
+        crudos = embedder.embed_texts(texts)
+        dims = {len(v) for v in crudos}
+        if len(dims) > 1:
+            raise RuntimeError(
+                f"Bloque {block.id}: dimensiones inconsistentes tras reintentar "
+                f"({sorted(dims)}). Indice NO escrito (el anterior queda intacto).")
+
+    vectors = np.asarray(crudos, dtype=np.float32)
     if vectors.ndim == 1:
         vectors = vectors.reshape(1, -1)
 

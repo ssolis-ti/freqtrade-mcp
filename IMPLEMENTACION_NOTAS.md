@@ -220,3 +220,47 @@ mcp_servers:
 
 Despues: `/reload-mcp` en la sesion de Hermes. Tools expuestas: `mcp_freq_config_consultar_docs`,
 `mcp_freq_config_health`.
+
+---
+
+## Sesion 2026-09-18 — repo remoto + fase 1 de endurecimiento
+
+### Contexto de uso (aclarado por el usuario)
+
+El sistema se usa como **centro de conocimiento para IA**: RAG de los 12 bloques
+documentales + grafo del codigo, con especialistas agenticos por area para cubrir
+un proyecto tan extenso como freqtrade. La capa de EJECUCION (entrar/salir/vetar)
+es secundaria: por defecto ni se registra (el gateway arranca solo-lectura).
+
+### Hecho
+
+1. **Repo remoto**: `github.com/ssolis-ti/freqtrade-mcp` (privado). Historial
+   auditado antes de subir: sin `.env`, sin claves. README con seccion
+   "Clonar en otra maquina" (los indices y el grafo no se versionan).
+2. **Fase 1 de seguridad** (commit `834bb96`, 11 tests nuevos):
+   - `cadena.backtesting` ahora falla CERRADO: metrica ausente = rechazo.
+   - `permisos.exigir_dry_run()` nuevo y cableado en las 7 tools del despacho y
+     las 4 del gateway. `verificar_dry_run` existia pero no lo llamaba nadie.
+     Live exige `PERMITIR_LIVE=1` en el entorno del proceso (no via tool).
+   - Gateway: auth Bearer real (antes el docstring la anunciaba y no existia),
+     default loopback, aborta si se pide interfaz de red sin key.
+3. **Bug del indexador**: si Gemini agota la cuota a mitad del corpus, los
+   primeros lotes salen dim 768 y el resto 384 -> numpy fallaba con
+   "inhomogeneous shape" y el bloque no se reindexaba. Ahora detecta la mezcla,
+   re-embebe todo con el backend ya degradado y deja el indice homogeneo; si aun
+   asi no cuadra, aborta sin tocar el indice anterior.
+4. **`verificar_indices.py`** recorre los 12 bloques (antes 4 hardcodeados) y
+   resume cuales siguen en local-hash.
+
+### Pendiente inmediato
+
+- **Reindexar 03-11 con Gemini**: intentado hoy, cuota agotada (429,
+  `embed_content_free_tier_requests` limit 100). Los 9 bloques siguen en
+  local-hash — funcional pero sin recuperacion semantica (y las preguntas en
+  espanol rinden mal, el corpus es ingles). Reintentar con cuota:
+  `tools/index_blocks.py --force`, y verificar con `tools/verificar_indices.py`.
+- **Gate de OK por operacion** (F1.4): `ok_usuario` sigue siendo parametro de
+  tool, asi que el LLM se autoriza solo. Contenido hoy por dry-run + flag de
+  proceso. Si algun dia se opera de verdad, mover la aprobacion fuera de banda.
+- Fases 2-6 del plan: benchmark de los 12 bloques, cadena real, instancia
+  freqtrade Docker, auditoria + preflight, CI del repo.
