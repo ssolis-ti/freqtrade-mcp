@@ -18,6 +18,9 @@ user_data/backtest_results/
 *.parquet
 data/rag/
 
+# graphify (knowledge graph generado; regenerable)
+graphify-out/
+
 # Spec-Kit / notas
 *.local
 

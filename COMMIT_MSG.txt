@@ -1,0 +1,14 @@
+docs: evaluacion graphify (knowledge graph) con evidencia medida
+
+- docs/graphify-evaluacion.md: que es graphify, entorno verificado (CLI 0.9.57
+  + extras [mcp,gemini], graphify-mcp con 10 tools), hallazgo critico medido:
+  * DOCS (95 .md): 26 nodos / 16 edges, ~$0.065, 31/49 archivos sin nodos
+  * CODIGO (66 archivos, --code-only): 468 nodos / 939 edges, 98% EXTRACTED, $0
+  Evidencia de calidad: god_nodes (Embedder 44, FreqtradeClient 33, Retriever 24,
+  AgenteLLM 19) y query_graph trazando Retriever<->AgenteLLM (34 nodos/45 edges).
+  Recomendacion: graphify para CODIGO (no para docs, que siguen en RAG);
+  integracion propuesta en 3 fases (A: codigo propio, B: codigo freqtrade,
+  C: enlace grafo<->RAG por bloque) + registro Hermes del MCP freq_graph.
+- tools/probe_graphify_mcp.py + probe_graph_code.py: inspeccion de las 10 tools
+  MCP del grafo y prueba sobre el codigo.
+- .gitignore: graphify-out/ (regenerable).
