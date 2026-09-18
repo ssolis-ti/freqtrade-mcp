@@ -53,16 +53,33 @@ trazando `Retriever` ↔ `AgenteLLM` por aristas `call` reales. El grafo **naveg
 
 ### Problemas sobre documentación
 
-1. **31 de 49 archivos no produjeron nodos**: el modelo omitió archivos ("produced no
-   nodes and are absent from the graph").
-2. **Densidad pobrísima**: 26 nodos / 16 edges para ~2 MB de prosa técnica.
-3. **Nodos con degree 0**: `explain configuration_dry_run` → `Degree: 0` (concepto aislado,
-   sin relaciones). Los nombres son buenos pero el grafo no conecta.
+> **ATENCIÓN — causa raíz identificada: RATE LIMIT, no limitación del modelo.**
+> El log de la extracción muestra: `Quota exceeded for metric:
+> generate_content_free_tier_requests, limit: 5, model: gemini-3-flash` y
+> `WARNING: 2/4 semantic chunk(s) failed`. El free tier de Gemini permite **5
+> requests/minuto** para `gemini-3-flash` (mucho más estricto que los 100/min de
+> embeddings). Con 49 archivos, la mayoría de los chunks fallaron por **cuota agotada**.
+> Por tanto el resultado de docs está **contaminado** y NO permite concluir que graphify
+> sea incapaz con prosa.
 
-**Interpretación**: graphify está optimizado para CÓDIGO (AST tree-sitter, denso en
-`imports`/`calls`/`inherits`). Para markdown, su paso semántico produce una lista de
-conceptos poco conectada — no un grafo navegable. Nuestra doc es prosa técnica densa,
-no código.
+Síntomas observados (todos consistentes con fallos de cuota, no con incapacidad):
+
+1. **31 de 49 archivos no produjeron nodos** — coincide con "semantic chunks failed".
+   Los archivos no fallaron por contenido: fallaron por 429.
+2. **Densidad baja** (26 nodos / 16 edges) — consecuencia directa de que ~63% de los
+   archivos nunca se procesaron.
+3. **Nodos con degree 0**: `explain configuration_dry_run` → `Degree: 0`. Puede ser
+   también artefacto de la extracción parcial (faltaban los otros archivos que habrían
+   aportado los edges).
+
+**Para verificar de verdad hace falta**: re-ejecutar con cuota disponible (o un backend
+sin límite tan agresivo, p.ej. el gateway LiteLLM local `:4000` con deepseek, que no tiene
+esos límites de free tier).
+
+**Interpretación corregida**: no hay evidencia de que graphify no sirva para docs; hay
+evidencia de que **el free tier de Gemini (5 req/min) es insuficiente** para extraer 95
+documentos en una corrida. El código, en cambio, se extrae localmente con AST y no
+depende de ninguna cuota — de ahí su resultado superior y reproducible.
 
 ## Dónde SÍ aportaría graphify (oportunidades reales)
 
@@ -98,11 +115,20 @@ podría elegir: citar la doc (RAG) o trazar la relación en el código (grafo).
 
 ## Recomendación (basada en la evidencia medida)
 
-- **NO** usar graphify para la documentación (26 nodos/16 edges para 95 docs vs 2,323
-  chunks consultables del RAG; además cuesta y omite archivos).
-- **SÍ** usar graphify sobre el **código** — validado: 468 nodos / 939 edges / 98%
-  EXTRACTED / $0. Aporta navegación estructural real que el RAG no tiene.
+- **Código → graphify SÍ** (validado: 468 nodos / 939 edges / 98% EXTRACTED / $0 / sin
+  dependencia de cuotas). Aporta navegación estructural real que el RAG no tiene.
+- **Docs → RAG SÍ, y graphify queda PENDIENTE DE VERIFICAR**: la corrida sobre docs falló
+  por rate limit de Gemini (5 req/min), no por incapacidad. Para saber si el grafo de docs
+  aporta algo hay que re-ejecutar con un backend sin esos límites (el gateway LiteLLM
+  local `:4000` con deepseek, que ya usamos para los agentes).
 - Complemento natural: **RAG = "¿qué dice la doc?"**, **grafo = "¿cómo se conecta el código?"**
+
+### Decisión pendiente clave (antes de cualquier integración de docs)
+
+Re-ejecutar la extracción de docs con `--backend openai` apuntando al gateway local
+(`OPENAI_BASE_URL=http://localhost:4000/v1`, `OPENAI_API_KEY`=master key,
+`OPENAI_MODEL=deepseek-via-inference`). Sin límite de 5 req/min, el resultado dirá si el
+grafo de documentación es útil o no. **Coste**: 0 (gateway local propio).
 
 ### Integración propuesta (feature 004, pendiente de decisión)
 
