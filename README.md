@@ -42,6 +42,42 @@ python -m pytest tests/ -q
 > por la ruta donde clonaste el repo. Ningún script depende de una ruta de usuario: la
 > raíz del proyecto se deriva de la ubicación del propio archivo.
 
+## Clonar en otra máquina
+
+El repositorio **no versiona los índices del RAG** (`data/rag/`, gitignored) ni el grafo
+del código (`graphify-out/`): ambos son artefactos regenerables y pesados. Tras clonar hay
+que reconstruirlos, o el primer arranque falla con `INDEX_MISSING`.
+
+```bash
+git clone https://github.com/ssolis-ti/freqtrade-mcp.git && cd freqtrade-mcp
+
+# 1. Entorno (Windows: .venv/Scripts/activate)
+python -m venv .venv && . .venv/bin/activate
+unset PYTHONPATH                  # obligatorio si hay un PYTHONPATH global
+pip install -r requirements.txt
+
+# 2. Credenciales (nunca se versionan)
+cp .env.example .env              # completar GEMINI_API_KEY / LLM_* / EMBED_* / FREQTRADE_*
+
+# 3. Reconstruir los índices del RAG (12 bloques; el corpus SÍ viene en el repo)
+python tools/index_blocks.py      # sin GEMINI_API_KEY degrada a local-hash (funcional, menos preciso)
+
+# 4. Verificar
+python tools/verificar_indices.py
+python -m pytest tests/ -q
+```
+
+Opcional — grafo del código (local, sin coste, sin LLM; habilita las tools `grafo_*` del
+gateway):
+
+```bash
+graphify extract . --code-only --no-viz   # requiere: uv tool install "graphifyy[mcp]"
+```
+
+> Lo que **sí** viaja en el repo: los dos mirrors de documentación (`docs-freqtrade/`,
+> `docs-freqtrade-web/`), el código, las specs y el baseline de benchmark. Lo que **no**:
+> `.env`, `.venv/`, `data/rag/`, `graphify-out/`.
+
 ## ¿Qué es esto?
 
 Operar **freqtrade** (bot de trading crypto open source) como una **maquinaria controlada por
