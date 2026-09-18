@@ -178,6 +178,25 @@ Integración real con freqtrade Docker dry-run pendiente (T326-T330, requiere OK
   `specs/003-despacho-operativo/` (tasks T301-T325 hechas, T326-T330 pendientes).
 - Constitution: `.specify/memory/constitution.md`.
 
+### Graphify (evaluación, 2026-09-18)
+
+Ver `docs/graphify-evaluacion.md`. Resumen:
+- `graphify` 0.9.57 + extras `[mcp,gemini]` instalado; `graphify-mcp` expone 10 tools.
+- **Código → SÍ** (validado: `graphify extract . --code-only` ⇒ 468 nodos / 939 edges /
+  98% EXTRACTED / $0 local). El grafo del código ya está en `graphify-out/` (gitignored).
+- **Docs → pendiente de verificar**: la 1ª corrida falló por rate limit de Gemini
+  (5 req/min free tier), no por incapacidad. El reintento con el gateway local quedó
+  **bloqueado por entorno** (Docker Desktop apagado ⇒ gateway LiteLLM `:4000` caído,
+  `Connection error`). Reintentar con Docker + gateway arriba (comandos exactos en
+  `docs/graphify-evaluacion.md`).
+- Comandos clave:
+  ```bash
+  graphify extract . --code-only --no-viz     # código propio: 468 nodos, $0
+  graphify cluster-only .                     # GRAPH_REPORT.md + comunidades
+  graphify export html                        # graph.html navegable
+  .venv/Scripts/python.exe tools/probe_graph_code.py   # stats + god_nodes + query
+  ```
+
 ## Pendientes / siguientes pasos
 
 - **Registro en Hermes** (T033): entry `mcp_servers.freq_config` en `config.yaml` (paths

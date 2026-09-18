@@ -125,10 +125,26 @@ podría elegir: citar la doc (RAG) o trazar la relación en el código (grafo).
 
 ### Decisión pendiente clave (antes de cualquier integración de docs)
 
-Re-ejecutar la extracción de docs con `--backend openai` apuntando al gateway local
-(`OPENAI_BASE_URL=http://localhost:4000/v1`, `OPENAI_API_KEY`=master key,
-`OPENAI_MODEL=deepseek-via-inference`). Sin límite de 5 req/min, el resultado dirá si el
-grafo de documentación es útil o no. **Coste**: 0 (gateway local propio).
+Re-ejecutar la extracción de docs con un backend sin límite de 5 req/min. **Intento hecho
+(2026-09-18) con el gateway local — BLOQUEADO por entorno**: el gateway LiteLLM `:4000`
+no estaba corriendo (Docker Desktop apagado; `curl` → HTTP 000 / conexión rechazada, y
+`docker ps` → no conecta al daemon). graphify reportó `chunk 1/2 failed: Connection error`.
+
+**Para reintentar (cuando Docker + gateway estén arriba):**
+```bash
+cd /c/Users/P0zcl/Desktop/proyectos/freq && unset PYTHONPATH
+export OPENAI_BASE_URL=http://localhost:4000/v1
+export OPENAI_API_KEY=$(grep '^LLM_API_KEY=' .env | cut -d= -f2-)
+export OPENAI_MODEL=deepseek-via-inference
+graphify extract docs-freqtrade --backend openai --no-viz --allow-partial
+```
+Verificar antes que el gateway responde: `curl -s -o /dev/null -w "%{http_code}"
+http://localhost:4000/v1/models -H "Authorization: Bearer $KEY"` → debe dar 200.
+
+**Alternativa sin gateway**: reintentar con Gemini espaciando las llamadas (el free tier de
+`gemini-3-flash` permite 5 req/min; graphify no parece respetar ese límite de forma
+automática, así que habría que procesar por bloques pequeños en corridas sucesivas —
+el modo incremental de graphify (`N unchanged`) lo permite).
 
 ### Integración propuesta (feature 004, pendiente de decisión)
 
