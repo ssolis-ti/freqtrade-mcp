@@ -252,6 +252,9 @@ Lo que sigue (feature 003 — **spec definido**, pendiente de implementación):
 ## Lecturas de referencia
 
 - `docs/ARQUITECTURA.md` — **documento maestro** (arquitectura, módulos, tools, formatos, estado).
+- `docs/conector-universal.md` — **gateway MCP HTTP**: un endpoint para cualquier agente/LLM
+  (19 tools, solo-lectura por defecto, LAN).
+- `docs/graphify-evaluacion.md` — evaluación del knowledge graph (código vs docs).
 - `docs/oficina-agentes.md` — diseño de la oficina (roles, modelos, endpoints, capas).
 - `docs/freqtrade-integracion.md` — comandos CLI y endpoints REST verificados de la doc
   oficial (mapa de la maquinaria que los agentes controlan).
