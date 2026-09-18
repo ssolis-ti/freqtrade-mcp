@@ -7,7 +7,8 @@ from pathlib import Path
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-GRAPH = str(Path(r"C:\Users\P0zcl\Desktop\proyectos\freq\graphify-out\graph.json"))
+GRAPH = sys.argv[1] if len(sys.argv) > 1 else str(
+    Path(__file__).resolve().parent.parent / "graphify-out" / "graph.json")
 MCP_BIN = str(Path.home() / "AppData/Roaming/uv/tools/graphifyy/Scripts/graphify-mcp.exe")
 
 

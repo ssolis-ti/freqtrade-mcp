@@ -1,0 +1,15 @@
+chore: prepara el repo para publicacion (portabilidad + limpieza)
+
+- README: seccion "Inicio rapido" (7 pasos reproducibles) + nota de portabilidad
+  de rutas (los ejemplos usan una instalacion concreta; ninguna ruta de usuario
+  es dependencia del codigo).
+- tools/setup_env_key.py: ruta del litellm.env via LITELLM_ENV_PATH o
+  autodeteccion (antes: ruta absoluta hardcodeada de un deploy privado).
+- tools/probe_graph_code.py: ruta del grafo derivada de la ubicacion del script
+  (antes: ruta absoluta).
+- Eliminados 6 scripts de sondeo desechables (probe_gateway, probe_chat_gateway,
+  probe_nvidia_embed, probe_inference_models, probe_agente, probe_graphify_mcp):
+  eran diagnostico puntual ya cumplido.
+
+Auditoria previa: 0 secretos en el historial (sin claves reales), .env fuera del
+repo. Suite: 56/56 tests GREEN.

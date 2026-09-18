@@ -1,17 +1,38 @@
-"""Copia LLM_API_KEY desde litellm.env al .env del proyecto (sin imprimirla).
+"""Copia LLM_API_KEY desde el entorno de LiteLLM al .env del proyecto (sin imprimirla).
+
+La ruta del litellm.env se toma de la variable LITELLM_ENV_PATH (o se autodetecta
+en ubicaciones comunes). Asi el script es portable: no depende de rutas de un usuario.
 
 Solo escribe si .env no existe o no tiene LLM_API_KEY. Nunca imprime el valor.
 """
+import os
 import re
 import sys
 from pathlib import Path
 
-SRC = Path(r"C:\Users\P0zcl\Desktop\deploys-docker\litellm-deploy\internal\litellm.env")
+# Candidatos: variable de entorno primero, luego rutas relativas comunes
+CANDIDATOS = [
+    os.getenv("LITELLM_ENV_PATH", ""),
+    "litellm.env",
+    "../litellm-deploy/internal/litellm.env",
+    "../deploys-docker/litellm-deploy/internal/litellm.env",
+    "~/litellm-deploy/internal/litellm.env",
+]
+
 DST = Path(__file__).resolve().parent.parent / ".env"
 
-if not SRC.exists():
-    print("litellm.env no existe; nada que copiar")
-    sys.exit(0)
+SRC = None
+for cand in CANDIDATOS:
+    if not cand:
+        continue
+    p = Path(cand).expanduser()
+    if p.exists():
+        SRC = p
+        break
+
+if SRC is None:
+    print("No se encontro litellm.env. Define LITELLM_ENV_PATH=/ruta/a/litellm.env")
+    sys.exit(1)
 
 key = None
 for line in SRC.read_text(encoding="utf-8").splitlines():

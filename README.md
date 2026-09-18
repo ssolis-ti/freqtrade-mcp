@@ -7,6 +7,41 @@
 > **Para entender el proyecto en profundidad** (arquitectura, módulos, tools, formatos,
 > estado): leer `docs/ARQUITECTURA.md` — es el documento maestro.
 
+## Inicio rápido
+
+```bash
+# 1. Entorno (Python 3.11+; en Windows usar el venv del proyecto, nunca el global)
+python -m venv .venv && . .venv/Scripts/activate   # o .venv/bin/activate en Linux
+unset PYTHONPATH                      # obligatorio si hay un PYTHONPATH global
+pip install -r requirements.txt
+
+# 2. Configuracion (copia y completa; .env nunca se versiona)
+cp .env.example .env                  # EMBED_* / GEMINI_API_KEY / LLM_* / FREQTRADE_*
+
+# 3. Corpus de documentacion (ya incluido en docs-freqtrade* ; regenerable)
+python tools/fetch_docs.py --branch develop --out docs-freqtrade
+python tools/fetch_docs_web.py --out docs-freqtrade-web
+
+# 4. Indexar el RAG (12 bloques documentales)
+python tools/index_blocks.py
+
+# 5. Probar
+python tools/query_block.py 02-configuracion "how to enable futures trading"
+python tools/benchmark_rag.py 02-configuracion     # recall@1/@3, MRR
+
+# 6. Gateway MCP universal (un endpoint HTTP para cualquier agente/LLM)
+python servers/gateway_http.py --transport streamable-http
+# -> http://0.0.0.0:8765/mcp   (19 tools, solo-lectura por defecto)
+
+# 7. Tests
+python -m pytest tests/ -q
+```
+
+> **Portabilidad**: los ejemplos de configuración de este repo usan rutas de una
+> instalación concreta (p. ej. `C:\Users\<usuario>\Desktop\proyectos\freq`). Sustitúyelas
+> por la ruta donde clonaste el repo. Ningún script depende de una ruta de usuario: la
+> raíz del proyecto se deriva de la ubicación del propio archivo.
+
 ## ¿Qué es esto?
 
 Operar **freqtrade** (bot de trading crypto open source) como una **maquinaria controlada por
