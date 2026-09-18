@@ -5,8 +5,9 @@ Concentra en un unico proceso y endpoint las tools de:
   - Operacion (despacho: wrapper REST de freqtrade)
   - Grafo de conocimiento (graphify: god_nodes, query, shortest_path, ...)
 
-Transporte: Streamable HTTP (spec MCP 2025-03-26) sobre 0.0.0.0:8765 (LAN).
-Auth: Bearer API key (GATEWAY_API_KEY en .env).
+Transporte: Streamable HTTP (spec MCP 2025-03-26) sobre 127.0.0.1:8765 por defecto.
+Auth: Bearer API key obligatoria (GATEWAY_API_KEY). Sin key solo se permite
+escuchar en loopback; exponer el gateway a la LAN sin key esta prohibido.
 Seguridad: MODO SOLO-LECTURA por defecto. Las tools de escritura solo se exponen
 si el gateway arranca con --permitir-escritura (confirmacion explicita del usuario).
 """
@@ -29,7 +30,7 @@ from rag.retriever import Retriever
 # ---------------------------------------------------------------------------
 # Configuracion
 # ---------------------------------------------------------------------------
-GATEWAY_HOST = os.getenv("GATEWAY_HOST", "0.0.0.0")
+GATEWAY_HOST = os.getenv("GATEWAY_HOST", "127.0.0.1")
 GATEWAY_PORT = int(os.getenv("GATEWAY_PORT", "8765"))
 GATEWAY_API_KEY = os.getenv("GATEWAY_API_KEY", "")
 
@@ -290,35 +291,89 @@ def build_gateway(permitir_escritura: bool = False,
     if permitir_escritura:
         from despacho import permisos
 
+        def _gate_escritura(tool_name: str) -> None:
+            """Barrera de escritura del gateway.
+
+            La autorizacion humana aqui es el flag --permitir-escritura del
+            proceso (un LLM no puede activarlo). Encima se exige que el bot
+            este en dry_run, comprobado contra el bot real y fail-closed.
+            """
+            permisos.autorizar(tool_name, True)
+            permisos.exigir_dry_run(_ft())
+
         @mcp.tool()
         def entrar(pair: str, side: str = "long",
                    stake_amount: float | None = None,
                    leverage: float | None = None) -> str:
             """FUERZA ENTRADA (gateway en modo escritura autorizado)."""
-            permisos.autorizar("entrar", True)
+            _gate_escritura("entrar")
             return json.dumps(_ft().entrar(pair, side, stake_amount, leverage),
                               ensure_ascii=False)
 
         @mcp.tool()
         def salir(trade_id: int, ordertype: str = "market") -> str:
             """FUERZA SALIDA (gateway en modo escritura autorizado)."""
-            permisos.autorizar("salir", True)
+            _gate_escritura("salir")
             return json.dumps(_ft().salir(trade_id, ordertype), ensure_ascii=False)
 
         @mcp.tool()
         def vetar(pairs: str) -> str:
             """Anade pares a la blacklist (separados por coma)."""
-            permisos.autorizar("vetar", True)
+            _gate_escritura("vetar")
             lista = [p.strip() for p in pairs.split(",") if p.strip()]
             return json.dumps(_ft().vetar(lista), ensure_ascii=False)
 
         @mcp.tool()
         def detener_compras() -> str:
             """Detiene nuevas compras."""
-            permisos.autorizar("detener_compras", True)
+            _gate_escritura("detener_compras")
             return json.dumps(_ft().detener_compras(), ensure_ascii=False)
 
     return mcp
+
+
+def _es_loopback(host: str) -> bool:
+    return host in ("127.0.0.1", "localhost", "::1")
+
+
+class BearerAuthMiddleware:
+    """Middleware ASGI: exige `Authorization: Bearer <GATEWAY_API_KEY>`.
+
+    Se aplica a TODA peticion HTTP del gateway. La comparacion es de tiempo
+    constante para no filtrar el prefijo de la key por temporizacion.
+    """
+
+    def __init__(self, app, api_key: str) -> None:  # noqa: ANN001
+        self.app = app
+        self.api_key = api_key
+
+    async def __call__(self, scope, receive, send):  # noqa: ANN001
+        if scope.get("type") != "http":
+            await self.app(scope, receive, send)
+            return
+        import hmac
+
+        cabeceras = {k.decode().lower(): v.decode()
+                     for k, v in scope.get("headers", [])}
+        entregado = cabeceras.get("authorization", "")
+        prefijo = "Bearer "
+        token = entregado[len(prefijo):] if entregado.startswith(prefijo) else ""
+        if not hmac.compare_digest(token, self.api_key):
+            cuerpo = json.dumps({"error": "unauthorized"}).encode()
+            await send({"type": "http.response.start", "status": 401,
+                        "headers": [(b"content-type", b"application/json"),
+                                    (b"www-authenticate", b"Bearer")]})
+            await send({"type": "http.response.body", "body": cuerpo})
+            return
+        await self.app(scope, receive, send)
+
+
+def construir_app(mcp, api_key: str):  # noqa: ANN001
+    """App ASGI del gateway, con auth Bearer si hay key configurada."""
+    app = mcp.streamable_http_app()
+    if api_key:
+        return BearerAuthMiddleware(app, api_key)
+    return app
 
 
 def main() -> int:  # pragma: no cover
@@ -330,13 +385,34 @@ def main() -> int:  # pragma: no cover
                         help="Expone las tools de ejecucion (requiere autorizacion humana)")
     parser.add_argument("--transport", default="streamable-http",
                         choices=["streamable-http", "stdio"])
+    parser.add_argument("--host", default=GATEWAY_HOST,
+                        help="Interfaz de escucha (default 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=GATEWAY_PORT)
     args = parser.parse_args()
+
+    # Regla dura: no exponer fuera de loopback sin autenticacion.
+    if args.transport == "streamable-http" and not _es_loopback(args.host)             and not GATEWAY_API_KEY:
+        print("[gateway] ABORTADO: escuchar en "
+              f"{args.host} sin GATEWAY_API_KEY expondria todas las tools a la "
+              "red sin autenticacion. Define GATEWAY_API_KEY en .env o usa "
+              "--host 127.0.0.1.", file=sys.stderr)
+        return 2
 
     mcp = build_gateway(permitir_escritura=args.permitir_escritura)
     modo = "ESCRITURA" if args.permitir_escritura else "SOLO-LECTURA"
-    print(f"[gateway] modo {modo} | http://{GATEWAY_HOST}:{GATEWAY_PORT}/mcp",
-          file=sys.stderr)
-    mcp.run(transport=args.transport)
+    auth = "con auth Bearer" if GATEWAY_API_KEY else "SIN auth (solo loopback)"
+
+    if args.transport == "stdio":
+        print(f"[gateway] modo {modo} | stdio", file=sys.stderr)
+        mcp.run(transport="stdio")
+        return 0
+
+    import uvicorn
+
+    print(f"[gateway] modo {modo} | {auth} | "
+          f"http://{args.host}:{args.port}/mcp", file=sys.stderr)
+    uvicorn.run(construir_app(mcp, GATEWAY_API_KEY),
+                host=args.host, port=args.port, log_level="info")
     return 0
 
 

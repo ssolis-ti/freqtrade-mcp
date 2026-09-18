@@ -117,20 +117,35 @@ plan_mision("cazar alts momentum 7d en futuros")
 
 ## 6. Seguridad
 
-- **Modo solo-lectura por defecto**: las tools de escritura no se registran (no es que
-  estén bloqueadas — no existen en el listado). Verificado por test automatizado.
-- **Escritura solo con flag explícito**: `--permitir-escritura` (autorización humana al
-  arrancar el proceso).
-- **Regla dura de la constitution (III)**: nunca arriesgar capital sin OK explícito.
-- **Pendiente (endurecimiento)**: API key Bearer por HTTP. Hoy el gateway escucha en LAN
-  sin auth — aceptable en red doméstica confiable, **no exponer a internet** sin auth+TLS.
-- Dry-run obligatorio: `bot_show_config()` para verificar antes de cualquier operación.
+Estado tras la fase 1 de endurecimiento (todas las garantias con test):
 
----
+- **Auth Bearer obligatoria**: `GATEWAY_API_KEY` en `.env`; el middleware ASGI
+  rechaza con 401 toda peticion sin `Authorization: Bearer <key>` (comparacion de
+  tiempo constante).
+- **Loopback por defecto**: escucha en `127.0.0.1:8765`. Arrancar en una interfaz
+  de red **sin** `GATEWAY_API_KEY` aborta con codigo 2 en vez de exponer las tools.
+- **Modo solo-lectura por defecto**: las tools de escritura no se registran (no
+  existen en el listado, no es que esten bloqueadas). Verificado por test.
+- **Escritura solo con flag explicito**: `--permitir-escritura`, autorizacion del
+  operador humano al arrancar el proceso. Un LLM no puede activarlo.
+- **dry_run obligatorio**: antes de cada operacion de escritura se comprueba contra
+  el bot real (`show_config`) que corre en dry_run. Fail-closed: si el bot no
+  responde, la operacion se bloquea. Operar en live exige ademas `PERMITIR_LIVE=1`
+  en el entorno del proceso (constitution III).
+
+```bash
+# Exponer a la LAN (requiere key)
+GATEWAY_API_KEY=$(openssl rand -hex 32)   # guardar en .env
+.venv/Scripts/python.exe servers/gateway_http.py --host 0.0.0.0
+```
+
+**Pendiente de endurecimiento**: TLS. La key viaja en claro sobre HTTP, aceptable en
+red domestica confiable; no exponer a internet sin TLS por delante.
 
 ## 7. Pendientes
 
-1. **API key** (Bearer) para el transporte HTTP — antes de exponer fuera de la LAN.
+1. **TLS** por delante del gateway si algun dia sale de la red local (la auth
+   Bearer ya esta; falta el cifrado del transporte).
 2. **Registro en Hermes** por `url` (requiere OK del usuario para editar config.yaml).
 3. **Reindexar bloques 03-11 con Gemini** cuando haya cuota (3 bloques ya semánticos).
 4. **freqtrade real**: sin Docker/gateway encendido, las tools `bot_*` no tienen contra

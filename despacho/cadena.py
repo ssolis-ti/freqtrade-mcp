@@ -47,9 +47,20 @@ def backtesting(strategy: str = "SampleStrategy",
     texto = (r.stdout or "") + (r.stderr or "")
     pf = _extraer_metric(texto, "profit factor")
     dd = _extraer_metric(texto, "drawdown")
-    ok_umbrales = (pf is None or pf >= CADENA_PF_MIN) and \
-                  (dd is None or dd <= CADENA_DRAWDOWN_MAX)
-    return {"ok": ok_umbrales, "profit_factor": pf, "drawdown": dd,
+    # FAIL-CLOSED (regla dura): una metrica que no se pudo leer NO pasa el filtro.
+    # Antes se evaluaba "pf is None or pf >= MIN", de modo que un reporte
+    # imposible de parsear daba ok=True y la cadena seguia sin validar el riesgo.
+    motivos: list[str] = []
+    if pf is None:
+        motivos.append("profit_factor no encontrado en el reporte")
+    elif pf < CADENA_PF_MIN:
+        motivos.append(f"profit_factor {pf} < minimo {CADENA_PF_MIN}")
+    if dd is None:
+        motivos.append("drawdown no encontrado en el reporte")
+    elif dd > CADENA_DRAWDOWN_MAX:
+        motivos.append(f"drawdown {dd} > maximo {CADENA_DRAWDOWN_MAX}")
+    return {"ok": not motivos, "motivos": motivos,
+            "profit_factor": pf, "drawdown": dd,
             "pf_min": CADENA_PF_MIN, "dd_max": CADENA_DRAWDOWN_MAX,
             "returncode": r.returncode}
 

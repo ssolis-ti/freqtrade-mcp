@@ -80,8 +80,17 @@ def build_despacho_mcp(client: FreqtradeClient | None = None,
 
     # ---------- Ejecucion (gate de permisos) ----------
 
-    def _ejecutar(tool_name: str, ok_usuario: bool, fn):
+    def _gate(tool_name: str, ok_usuario: bool) -> None:
+        """Doble barrera antes de tocar el exchange: OK del usuario + dry_run.
+
+        `exigir_dry_run` consulta al bot real (show_config) y falla cerrado si
+        no se puede comprobar o si el bot esta en live sin PERMITIR_LIVE.
+        """
         permisos.autorizar(tool_name, ok_usuario)
+        permisos.exigir_dry_run(ft)
+
+    def _ejecutar(tool_name: str, ok_usuario: bool, fn):
+        _gate(tool_name, ok_usuario)
         return json.dumps(fn(), ensure_ascii=False)
 
     @mcp.tool()
@@ -89,45 +98,45 @@ def build_despacho_mcp(client: FreqtradeClient | None = None,
                stake_amount: float | None = None,
                leverage: float | None = None) -> str:
         """FUERZA ENTRADA. Exige ok_usuario=True (regla dura)."""
-        permisos.autorizar("entrar", ok_usuario)
+        _gate("entrar", ok_usuario)
         return json.dumps(ft.entrar(pair, side, stake_amount, leverage),
                           ensure_ascii=False)
 
     @mcp.tool()
     def salir(trade_id: int, ok_usuario: bool, ordertype: str = "market") -> str:
         """FUERZA SALIDA. Exige ok_usuario=True (regla dura)."""
-        permisos.autorizar("salir", ok_usuario)
+        _gate("salir", ok_usuario)
         return json.dumps(ft.salir(trade_id, ordertype), ensure_ascii=False)
 
     @mcp.tool()
     def vetar(pairs: list, ok_usuario: bool) -> str:
         """Anade pares a la blacklist. Exige ok_usuario=True."""
-        permisos.autorizar("vetar", ok_usuario)
+        _gate("vetar", ok_usuario)
         return json.dumps(ft.vetar(pairs), ensure_ascii=False)
 
     @mcp.tool()
     def bloquear(pair: str, until: str, ok_usuario: bool,
                  reason: str = "") -> str:
         """Bloquea un par hasta una fecha. Exige ok_usuario=True."""
-        permisos.autorizar("bloquear", ok_usuario)
+        _gate("bloquear", ok_usuario)
         return json.dumps(ft.bloquear(pair, until, reason), ensure_ascii=False)
 
     @mcp.tool()
     def detener_compras(ok_usuario: bool) -> str:
         """Detiene nuevas compras. Exige ok_usuario=True."""
-        permisos.autorizar("detener_compras", ok_usuario)
+        _gate("detener_compras", ok_usuario)
         return json.dumps(ft.detener_compras(), ensure_ascii=False)
 
     @mcp.tool()
     def arrancar(ok_usuario: bool) -> str:
         """Arranca el bot. Exige ok_usuario=True."""
-        permisos.autorizar("arrancar", ok_usuario)
+        _gate("arrancar", ok_usuario)
         return json.dumps(ft.arrancar(), ensure_ascii=False)
 
     @mcp.tool()
     def detener(ok_usuario: bool) -> str:
         """Detiene el bot. Exige ok_usuario=True."""
-        permisos.autorizar("detener", ok_usuario)
+        _gate("detener", ok_usuario)
         return json.dumps(ft.detener(), ensure_ascii=False)
 
     # ---------- Manager ----------
