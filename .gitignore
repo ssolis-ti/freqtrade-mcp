@@ -27,3 +27,4 @@ graphify-out/
 # SO / editor
 Thumbs.db
 .DS_Store
+gateway.log
